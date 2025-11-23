@@ -1,0 +1,215 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+
+public class AssetSystem {
+    private ArrayList<Material> materials = new ArrayList<>();
+    private Scanner input = new Scanner(System.in);
+    private int nextId = 1;
+
+    public void assetManagement() {
+        int choice2;
+        while (true) {
+            System.out.println("===== ASSET MANAGEMENT =====");
+            System.out.println("1. Add Material");
+            System.out.println("2. Edit Material");
+            System.out.println("3. Delete Material");
+            System.out.println("4. View all Materials");
+            System.out.println("5. back");
+            System.out.println("Choose: ");
+
+            choice2 = input.nextInt();
+            input.nextLine(); 
+
+            switch (choice2) {
+                case 1:
+                    addMaterial();
+                    break;
+                case 2:
+                    editMaterial();
+                    break;
+                case 3:
+                    deleteMaterial();
+                    break;
+                case 4:
+                    viewAllMaterials();
+                    break;
+                case 5:
+                    return;
+                default: System.out.println("Invalid Choice");
+            }
+        }   
+    }
+
+    // ADD MATERIAL
+    private void addMaterial() {
+
+    try {
+        System.out.println("\nChoose Material Type");
+        System.out.println("1. Book");
+        System.out.println("2. Journal");
+        System.out.println("3. Magazine");
+        System.out.println("4. Thesis Book");
+        System.out.println("Enter Choice");
+        int t = input.nextInt();
+        input.nextLine();
+    
+        String type = "";
+        if (t==1) type = "Book";
+        else if (t==2) type = "Journal";
+        else if (t==3) type = "Magazine";
+        else if (t==4) type = "ThesisBook";
+        else {
+            System.out.println("Invalid type.");
+            return;
+            }   
+
+        int id = nextId++;
+        System.out.println("Generated ID: " + id);
+
+        if (findMaterialById(id) != null ) {
+            System.out.println("Material already exists.");
+            return;
+        }
+
+            System.out.print("Title/Name: ");
+            String title = input.nextLine().trim();
+
+            System.out.print("Author/Journal Name: ");
+            String author = input.nextLine().trim();
+
+            System.out.print("Year Published: ");
+            int year = input.nextInt();
+            input.nextLine();
+
+            System.out.print("Publisher: ");
+            String publisher = input.nextLine().trim();
+
+            System.out.print("Copies: ");
+            int copies = input.nextInt();
+            input.nextLine();
+
+            Material m = null;
+
+            if (type.equals("Book")) {
+                m = new Book(id, title, author, year, publisher, copies);
+            }
+            else if (type.equals("Journal")) {
+                m = new Journal(id, title, author, year, publisher, copies);
+            }
+            else if (type.equals("Magazine")) {
+                m = new Magazine(id, title, author, year, publisher, copies);
+            }
+            else if (type.equals("ThesisBook")) {
+                m = new ThesisBook(id, title, author, year, publisher, copies);
+            }
+
+            materials.add(m);
+            saveMaterials();
+            System.out.println("Material added successfully!");
+        
+        } catch (Exception e) {
+            System.out.println("Error: Invalid input.");
+            input.nextLine(); // clear buffer to avoid loop lock
+        }
+    }
+
+    // EDIT MATERIAL
+    private void editMaterial() {
+    System.out.print("Enter Material ID to edit: ");
+    int editId = input.nextInt();
+    input.nextLine(); 
+
+    Material m = findMaterialById(editId);
+
+    if (m == null) {
+        System.out.println("Material not found!");
+        return;
+    }
+
+    System.out.println("Editing Material: " + m.getTitleOrName());
+
+    // Ask user for new values (press ENTER to skip)
+
+    System.out.print("New Title/Name (leave blank to keep \"" + m.getTitleOrName() + "\"): ");
+    String newTitle = input.nextLine().trim();
+    if (!newTitle.isEmpty()) m.titleOrName = newTitle;
+
+    System.out.print("New Author/Journal Name (leave blank to keep \"" + m.getAuthorOrPublisher() + "\"): ");
+    String newAuthor = input.nextLine().trim();
+    if (!newAuthor.isEmpty()) m.authorOrPublisher = newAuthor;
+
+    System.out.print("New Year Published (0 to keep " + m.getYearPublished() + "): ");
+    int newYear = input.nextInt();
+    input.nextLine();
+    if (newYear != 0) m.yearPublished = newYear;
+
+    System.out.print("New Publisher (leave blank to keep \"" + m.getPublisher() + "\"): ");
+    String newPublisher = input.nextLine().trim();
+    if (!newPublisher.isEmpty()) m.publisher = newPublisher;
+
+    System.out.print("New Copies (0 to keep " + m.getCopies() + "): ");
+    int newCopies = input.nextInt();
+    input.nextLine();
+    if (newCopies != 0) m.copies = newCopies;
+
+    System.out.println("Material updated successfully!");
+}
+
+    //DELETE MATERIAL
+    public void deleteMaterial() {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter Material ID to delete: ");
+        int deleteId = sc.nextInt();
+
+        Material toDelete = null;
+
+        // Search in the ArrayList
+        for (Material m : materials) {
+            if (m.getMaterialId() == deleteId) {
+                toDelete = m;
+                break;
+            }
+        }
+
+        if (toDelete == null) {
+            System.out.println("Material with ID " + deleteId + " not found!");
+            return;
+        }
+
+        materials.remove(toDelete);
+        System.out.println("Material deleted successfully!");
+    }
+
+    //VIEW MATERIAL
+    private void viewAllMaterials() {
+    System.out.println("\n===== Materials ======");
+    System.out.println("\nID|  Title  |  Author  |Date of Publication| Publisher |  Copies  |");
+
+        if (materials.size() == 0) {
+            System.out.println("No materials.");
+        } else {
+            for (int i = 0; i < materials.size(); i++) {
+                Material m = materials.get(i);
+                System.out.println(m.toString());
+            }
+        }
+    }
+    
+    //SEARCH MATERIAL
+    private Material findMaterialById(int id) {
+
+        for (int i = 0; i < materials.size(); i++) {
+            Material m = materials.get(i);
+            if (m.getMaterialId() == id) {
+                return m; 
+            }
+        }
+
+        return null; 
+    }
+
+    private void saveMaterials() {
+    // Save to file (empty for now)
+    }
+}
